@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lucky or Clever? Interactive Explainer</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: rgba(255, 255, 255, 0.07);
+      --border: rgba(255, 255, 255, 0.12);
+      --text: #f3f5ff;
+      --muted: #b8c0dd;
+      --accent: #7c5cff;
+      --green: #22c55e;
+      --red: #ef4444;
+      --blue: #38bdf8;
+      --orange: #f97316;
+      --radius: 22px;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(124, 92, 255, 0.22), transparent 30%),
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.16), transparent 25%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    header {
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 56px 24px 18px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1.05;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 850px;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    nav {
+      max-width: 1150px;
+      margin: 28px auto 0;
+      padding: 0 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tab-button {
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+
+    .tab-button:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .tab-button.active {
+      background: var(--accent);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    main {
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 28px 24px 64px;
+    }
+
+    .tab {
+      display: none;
+    }
+
+    .tab.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2,
+    .card h3 {
+      margin-top: 0;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(124, 92, 255, 0.14);
+      border: 1px solid rgba(124, 92, 255, 0.35);
+      margin: 0 0 14px;
+      font-weight: 700;
+    }
+
+    .choice-grid {
+      display: grid;
+      gap: 10px;
+      margin: 12px 0 18px;
+    }
+
+    .choice {
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      padding: 13px 14px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.2s ease;
+      text-align: left;
+    }
+
+    .choice:hover {
+      background: rgba(255, 255, 255, 0.11);
+    }
+
+    .choice.selected {
+      background: var(--accent);
+      border-color: rgba(255, 255, 255, 0.24);
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin: 14px 0 8px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .bar-wrap {
+      width: 100%;
+      height: 18px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 10px 0 8px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 50%;
+      transition: width 0.25s ease;
+    }
+
+    .credit {
+      background: linear-gradient(90deg, #22c55e, #86efac);
+    }
+
+    .blame {
+      background: linear-gradient(90deg, #ef4444, #f97316);
+    }
+
+    .agent-row {
+      display: grid;
+      grid-template-columns: 95px 1fr 52px;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .agent-bar-wrap {
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .agent-bar-fill {
+      height: 100%;
+      width: 30%;
+      transition: width 0.25s ease;
+    }
+
+    .skilled {
+      background: linear-gradient(90deg, #22c55e, #86efac);
+    }
+
+    .average {
+      background: linear-gradient(90deg, #38bdf8, #93c5fd);
+    }
+
+    .unskilled {
+      background: linear-gradient(90deg, #f97316, #fb923c);
+    }
+
+    .formula {
+      font-family: monospace;
+      font-size: 1.02rem;
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin: 16px 0;
+      overflow-x: auto;
+    }
+
+    .note {
+      color: var(--muted);
+      border-left: 4px solid var(--accent);
+      padding-left: 12px;
+      margin-top: 14px;
+    }
+
+    .large-result {
+      font-size: 1.35rem;
+      font-weight: 900;
+      margin: 8px 0;
+    }
+
+    .emoji {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    ul {
+      padding-left: 22px;
+    }
+
+    li {
+      margin: 10px 0;
+    }
+
+    footer {
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 0 24px 48px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 700px) {
+      header {
+        padding-top: 36px;
+      }
+
+      .agent-row {
+        grid-template-columns: 75px 1fr 44px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Lucky or clever?</h1>
+    <p class="subtitle">
+      An interactive simplifier for the paper <strong>“Lucky or clever? From expectations to responsibility judgments”</strong>.
+      The paper argues that responsibility judgments depend on two things: what an action reveals about a person, and whether the action actually made a difference.
+    </p>
+  </header>
+
+  <nav>
+    <button class="tab-button active" data-tab="idea" onclick="showTab('idea')">Big idea</button>
+    <button class="tab-button" data-tab="demo" onclick="showTab('demo')">Goalie vs. spinner</button>
+    <button class="tab-button" data-tab="pivotality" onclick="showTab('pivotality')">Did it matter?</button>
+    <button class="tab-button" data-tab="model" onclick="showTab('model')">Model</button>
+    <button class="tab-button" data-tab="takeaways" onclick="showTab('takeaways')">Takeaways</button>
+  </nav>
+
+  <main>
+    <!-- BIG IDEA -->
+    <section id="idea" class="tab active">
+      <div class="grid">
+        <div class="card">
+          <h2>The paper’s core question</h2>
+          <p>
+            When someone’s action leads to a good or bad outcome, how much credit or blame should they receive?
+          </p>
+          <p class="muted">
+            A surprising puzzle: sometimes people get <strong>more</strong> responsibility for unexpected actions, but sometimes they get <strong>less</strong>. This page simplifies why.
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>Two mental ingredients</h2>
+          <ul>
+            <li>
+              <strong>Expectation change:</strong> What does the action reveal about the person? Are they skilled, average, or unskilled?
+            </li>
+            <li>
+              <strong>Pivotality:</strong> Did the action actually make a difference to the outcome?
+            </li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>Simplified formula</h2>
+          <div class="formula">
+            Responsibility ≈ expectation change + pivotality
+          </div>
+          <p class="muted">
+            In the actual paper, the model is more formal and quantitative, but the core intuition is this:
+            we judge people by what their action teaches us about them, and by how causally important their action was.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- GOALIE VS SPINNER -->
+    <section id="demo" class="tab">
+      <h2>Goalie vs. spinner</h2>
+      <p class="muted">
+        In the goalie world, an unexpected save can reveal skill. In the spinner world, an unexpected win may just be luck.
+        Change the probability and outcome to see how credit or blame changes.
+      </p>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Scenario controls</h3>
+
+          <div class="choice-grid">
+            <button class="choice world-btn selected" data-world="goalie" onclick="setWorld('goalie')">
+              Goalie world: skill is plausible
+            </button>
+            <button class="choice world-btn" data-world="spinner" onclick="setWorld('spinner')">
+              Spinner world: mostly luck
+            </button>
+          </div>
+
+          <label for="probSlider">
+            Chance that the chosen action succeeds: <span id="probValue">20%</span>
+          </label>
+          <input id="probSlider" type="range" min="20" max="80" step="5" value="20" oninput="updateGoalie()" />
+
+          <div class="choice-grid">
+            <button class="choice outcome-btn selected" data-outcome="success" onclick="setOutcome('success')">
+              Outcome: success
+            </button>
+            <button class="choice outcome-btn" data-outcome="failure" onclick="setOutcome('failure')">
+              Outcome: failure
+            </button>
+          </div>
+
+          <p class="note">
+            “Expected” means the chosen action had a high chance of success. “Unexpected” means it had a low chance of success.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Responsibility judgment</h3>
+          <div id="actionBadge" class="badge">Unexpected action · 20% chance</div>
+          <div id="responsibilityLabel" class="large-result">Credit: 85 / 100</div>
+          <div class="bar-wrap">
+            <div id="responsibilityBar" class="bar-fill credit" style="width: 85%"></div>
+          </div>
+          <p id="responsibilityExplanation" class="muted"></p>
+        </div>
+
+        <div class="card">
+          <h3>What the action reveals</h3>
+
+          <div class="agent-row">
+            <div>Skilled</div>
+            <div class="agent-bar-wrap">
+              <div id="skilledBar" class="agent-bar-fill skilled" style="width: 70%"></div>
+            </div>
+            <div id="skilledText">70%</div>
+          </div>
+
+          <div class="agent-row">
+            <div>Average</div>
+            <div class="agent-bar-wrap">
+              <div id="averageBar" class="agent-bar-fill average" style="width: 20%"></div>
+            </div>
+            <div id="averageText">20%</div>
+          </div>
+
+          <div class="agent-row">
+            <div>Unskilled</div>
+            <div class="agent-bar-wrap">
+              <div id="unskilledBar" class="agent-bar-fill unskilled" style="width: 10%"></div>
+            </div>
+            <div id="unskilledText">10%</div>
+          </div>
+
+          <p class="note">
+            This is a simplified inference panel. The paper’s formal model uses Bayesian updating to infer what type of person the agent is likely to be.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PIVOTALITY -->
+    <section id="pivotality" class="tab">
+      <h2>Did the action make a difference?</h2>
+      <p class="muted">
+        This demo simplifies the gardener experiment. A gardener chooses between two fertilizers.
+        Responsibility is stronger when the gardener’s choice was pivotal — when choosing differently would have changed the outcome.
+      </p>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Gardener controls</h3>
+
+          <label>Decision</label>
+          <div class="choice-grid">
+            <button class="choice pivot-choice-btn" data-choice="expected" onclick="setPivotChoice(true)">
+              Expected decision: chose the better fertilizer
+            </button>
+            <button class="choice pivot-choice-btn selected" data-choice="unexpected" onclick="setPivotChoice(false)">
+              Unexpected decision: chose the worse fertilizer
+            </button>
+          </div>
+
+          <label>Outcome</label>
+          <div class="choice-grid">
+            <button class="choice pivot-outcome-btn selected" data-pivot-outcome="good" onclick="setPivotOutcome('good')">
+              Flower grows
+            </button>
+            <button class="choice pivot-outcome-btn" data-pivot-outcome="bad" onclick="setPivotOutcome('bad')">
+              Flower dies
+            </button>
+          </div>
+
+          <label>Pivotality</label>
+          <div class="choice-grid">
+            <button class="choice pivotal-btn selected" data-pivotal="yes" onclick="setPivotPivotal(true)">
+              Pivotal: the other fertilizer would have changed the outcome
+            </button>
+            <button class="choice pivotal-btn" data-pivotal="no" onclick="setPivotPivotal(false)">
+              Not pivotal: the outcome would have happened anyway
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Result</h3>
+          <div id="pivotEmoji" class="emoji">🌼</div>
+          <div id="pivotBadge" class="badge">Unexpected decision · pivotal</div>
+          <div id="pivotLabel" class="large-result">Credit: 90 / 100</div>
+          <div class="bar-wrap">
+            <div id="pivotBar" class="bar-fill credit" style="width: 90%"></div>
+          </div>
+          <p id="pivotExplanation" class="muted"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODEL -->
+    <section id="model" class="tab">
+      <h2>The simplified model</h2>
+      <p class="muted">
+        Move the sliders to see how expectation change and pivotality combine. This is a teaching version, not the exact quantitative model from the paper.
+      </p>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Inputs</h3>
+
+          <label for="expectationSlider">
+            Expectation change: <span id="expectationValue">+50</span>
+          </label>
+          <input id="expectationSlider" type="range" min="-100" max="100" step="5" value="50" oninput="updateModel()" />
+          <p class="muted">
+            Negative means the person looks worse than expected. Positive means the person looks better than expected.
+          </p>
+
+          <label for="pivotalitySlider">
+            Pivotality: <span id="pivotalityValue">80%</span>
+          </label>
+          <input id="pivotalitySlider" type="range" min="0" max="100" step="5" value="80" oninput="updateModel()" />
+          <p class="muted">
+            Higher means the action made more of a difference to the outcome.
+          </p>
+
+          <label for="weightExpectation">
+            Weight on expectation change: <span id="weightExpectationValue">0.70</span>
+          </label>
+          <input id="weightExpectation" type="range" min="0" max="1" step="0.05" value="0.70" oninput="updateModel()" />
+
+          <label for="weightPivotality">
+            Weight on pivotality: <span id="weightPivotalityValue">0.50</span>
+          </label>
+          <input id="weightPivotality" type="range" min="0" max="1" step="0.05" value="0.50" oninput="updateModel()" />
+        </div>
+
+        <div class="card">
+          <h3>Predicted responsibility</h3>
+          <div id="modelLabel" class="large-result">Credit: 76 / 100</div>
+          <div class="bar-wrap">
+            <div id="modelBar" class="bar-fill credit" style="width: 76%"></div>
+          </div>
+          <p id="modelExplanation" class="muted"></p>
+
+          <div class="formula">
+            Responsibility ≈ 50<br />
+            &nbsp;&nbsp;+ weight × expectation change<br />
+            &nbsp;&nbsp;+ weight × pivotality
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAKEAWAYS -->
+    <section id="takeaways" class="tab">
+      <h2>Key takeaways</h2>
+
+      <div class="grid">
+        <div class="card">
+          <h3>1. Unexpected does not always mean more responsibility</h3>
+          <p class="muted">
+            The paper resolves a puzzle: unexpected actions can receive more responsibility when they reveal skill, but less when they reveal poor judgment or luck.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>2. Credit depends on what the action reveals</h3>
+          <p class="muted">
+            If an unexpected success makes the person look skilled, they get more credit. If it just looks like luck, they get less credit.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>3. Blame increases when unexpected actions fail</h3>
+          <p class="muted">
+            If someone takes a risky or unexpected action and fails, observers often infer poor decision-making or lack of skill, increasing blame.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>4. Causal impact matters</h3>
+          <p class="muted">
+            People are held more responsible when their action was pivotal — when the outcome would have been different if they had chosen differently.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>5. Responsibility combines person and action</h3>
+          <p class="muted">
+            The paper’s model combines a person-centered process — updating expectations about the agent — with an action-centered process — evaluating causal pivotality.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Simplified interactive explainer based on Gerstenberg et al. (2018), <em>Lucky or clever? From expectations to responsibility judgments</em>.
+    The interactive calculations are intentionally simplified for teaching purposes.
+  </footer>
+
+  <script>
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function showTab(tabId) {
+      document.querySelectorAll(".tab").forEach(function (section) {
+        section.classList.remove("active");
+      });
+
+      document.querySelectorAll(".tab-button").forEach(function (button) {
+        button.classList.remove("active");
+      });
+
+      document.getElementById(tabId).classList.add("active");
+      document.querySelector('[data-tab="' + tabId + '"]').classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    /* Goalie vs spinner state */
+    let world = "goalie";
+    let outcome = "success";
+
+    function setWorld(selectedWorld) {
+      world = selectedWorld;
+
+      document.querySelectorAll(".world-btn").forEach(function (button) {
+        button.classList.toggle("selected", button.dataset.world === selectedWorld);
+      });
+
+      updateGoalie();
+    }
+
+    function setOutcome(selectedOutcome) {
+      outcome = selectedOutcome;
+
+      document.querySelectorAll(".outcome-btn").forEach(function (button) {
+        button.classList.toggle("selected", button.dataset.outcome === selectedOutcome);
+      });
+
+      updateGoalie();
+    }
+
+    function updateGoalie() {
+      const p = Number(document.getElementById("probSlider").value);
+      const expected = p >= 50;
+
+      document.getElementById("probValue").textContent = p + "%";
+
+      const actionBadge = document.getElementById("actionBadge");
+      actionBadge.textContent =
+        (expected ? "Expected action" : "Unexpected action") + " · " + p + "% chance";
+
+      let responsibility;
+      let tone;
+      let explanation;
+
+      if (outcome === "success") {
+        tone = "credit";
+
+        if (world === "goalie") {
+          responsibility = 55 + (50 - p);
+          explanation =
+            "In the goalie world, an unexpected success can reveal skill. Saving a low-probability shot can make the goalie look clever, so credit can increase.";
+        } else {
+          responsibility = 55 + (p - 50);
+          explanation =
+            "In the spinner world, unexpected success may be luck. Choosing the more probable outcome looks like better decision-making, so credit tends to favor the expected choice.";
+        }
+      } else {
+        tone = "blame";
+        responsibility = 55 + (50 - p);
+        explanation =
+          "When a low-probability action fails, it suggests poor judgment or lack of skill. Unexpected failures therefore receive more blame.";
+      }
+
+      responsibility = clamp(Math.round(responsibility), 5, 95);
+
+      const label = tone === "credit" ? "Credit" : "Blame";
+      document.getElementById("responsibilityLabel").textContent =
+        label + ": " + responsibility + " / 100";
+
+      const bar = document.getElementById("responsibilityBar");
+      bar.style.width = responsibility + "%";
+      bar.className = "bar-fill " + tone;
+
+      document.getElementById("responsibilityExplanation").textContent = explanation;
+
+      /* Simplified agent inference */
+      let skilled;
+      let average;
+      let unskilled;
+
+      if (outcome === "success") {
+        if (expected) {
+          if (world === "goalie") {
+            skilled = 35;
+            average = 50;
+            unskilled = 15;
+          } else {
+            skilled = 20;
+            average = 60;
+            unskilled = 20;
+          }
+        } else {
+          if (world === "goalie") {
+            skilled = 70;
+            average = 20;
+            unskilled = 10;
+          } else {
+            skilled = 30;
+            average = 45;
+            unskilled = 25;
+          }
+        }
+      } else {
+        if (expected) {
+          skilled = 15;
+          average = 55;
+          unskilled = 30;
+        } else {
+          skilled = 10;
+          average = 20;
+          unskilled = 70;
+        }
+      }
+
+      document.getElementById("skilledBar").style.width = skilled + "%";
+      document.getElementById("averageBar").style.width = average + "%";
+      document.getElementById("unskilledBar").style.width = unskilled + "%";
+
+      document.getElementById("skilledText").textContent = skilled + "%";
+      document.getElementById("averageText").textContent = average + "%";
+      document.getElementById("unskilledText").textContent = unskilled + "%";
+    }
+
+    /* Pivotality state */
+    let pivotChoiceExpected = false;
+    let pivotOutcome = "good";
+    let pivotPivotal = true;
+
+    function setPivotChoice(isExpected) {
+      pivotChoiceExpected = isExpected;
+
+      document.querySelectorAll(".pivot-choice-btn").forEach(function (button) {
+        const buttonValue = button.dataset.choice === "expected";
+        button.classList.toggle("selected", buttonValue === isExpected);
+      });
+
+      updatePivotality();
+    }
+
+    function setPivotOutcome(selectedOutcome) {
+      pivotOutcome = selectedOutcome;
+
+      document.querySelectorAll(".pivot-outcome-btn").forEach(function (button) {
+        button.classList.toggle("selected", button.dataset.pivotOutcome === selectedOutcome);
+      });
+
+      updatePivotality();
+    }
+
+    function setPivotPivotal(isPivotal) {
+      pivotPivotal = isPivotal;
+
+      document.querySelectorAll(".pivotal-btn").forEach(function (button) {
+        const buttonValue = button.dataset.pivotal === "yes";
+        button.classList.toggle("selected", buttonValue === isPivotal);
+      });
+
+      updatePivotality();
+    }
+
+    function updatePivotality() {
+      let responsibility;
+      let tone;
+      let explanation;
+
+      if (pivotOutcome === "good") {
+        tone = "credit";
+
+        if (pivotChoiceExpected) {
+          responsibility = 48;
+          explanation =
+            "The gardener chose the sensible option and succeeded. This earns moderate credit because the success was expected.";
+        } else {
+          responsibility = 72;
+          explanation =
+            "The gardener chose unexpectedly and succeeded. This can suggest special insight or skill, so credit is higher.";
+        }
+
+        document.getElementById("pivotEmoji").textContent = "🌼";
+      } else {
+        tone = "blame";
+
+        if (pivotChoiceExpected) {
+          responsibility = 38;
+          explanation =
+            "The gardener chose the sensible option but still failed. Blame is reduced because the decision itself looked reasonable.";
+        } else {
+          responsibility = 72;
+          explanation =
+            "The gardener chose unexpectedly and failed. This looks like poor judgment, so blame is stronger.";
+        }
+
+        document.getElementById("pivotEmoji").textContent = "🥀";
+      }
+
+      if (pivotPivotal) {
+        responsibility += 18;
+        explanation +=
+          " The action was pivotal: choosing differently would have changed the outcome.";
+      } else {
+        responsibility -= 12;
+        explanation +=
+          " The action was not pivotal: the outcome would have happened anyway, reducing responsibility.";
+      }
+
+      responsibility = clamp(Math.round(responsibility), 5, 95);
+
+      const label = tone === "credit" ? "Credit" : "Blame";
+      const choiceText = pivotChoiceExpected ? "Expected decision" : "Unexpected decision";
+      const pivotalText = pivotPivotal ? "pivotal" : "not pivotal";
+
+      document.getElementById("pivotBadge").textContent =
+        choiceText + " · " + pivotalText;
+
+      document.getElementById("pivotLabel").textContent =
+        label + ": " + responsibility + " / 100";
+
+      const bar = document.getElementById("pivotBar");
+      bar.style.width = responsibility + "%";
+      bar.className = "bar-fill " + tone;
+
+      document.getElementById("pivotExplanation").textContent = explanation;
+    }
+
+    /* Model calculator */
+    function updateModel() {
+      const expectationRaw = Number(document.getElementById("expectationSlider").value);
+      const pivotalityRaw = Number(document.getElementById("pivotalitySlider").value);
+      const weightExpectation = Number(document.getElementById("weightExpectation").value);
+      const weightPivotality = Number(document.getElementById("weightPivotality").value);
+
+      document.getElementById("expectationValue").textContent =
+        (expectationRaw > 0 ? "+" : "") + expectationRaw;
+
+      document.getElementById("pivotalityValue").textContent =
+        pivotalityRaw + "%";
+
+      document.getElementById("weightExpectationValue").textContent =
+        weightExpectation.toFixed(2);
+
+      document.getElementById("weightPivotalityValue").textContent =
+        weightPivotality.toFixed(2);
+
+      const expectation = expectationRaw / 100;
+      const pivotality = pivotalityRaw / 100;
+
+      const expectationContribution = 45 * weightExpectation * expectation;
+      const pivotalityContribution = 25 * weightPivotality * pivotality;
+
+      let responsibility = 50 + expectationContribution + pivotalityContribution;
+      responsibility = clamp(Math.round(responsibility), 0, 100);
+
+      const tone = responsibility >= 50 ? "credit" : "blame";
+      const label = responsibility >= 50 ? "Credit" : "Blame";
+
+      document.getElementById("modelLabel").textContent =
+        label + ": " + responsibility + " / 100";
+
+      const bar = document.getElementById("modelBar");
+      bar.style.width = Math.max(responsibility, 3) + "%";
+      bar.className = "bar-fill " + tone;
+
+      document.getElementById("modelExplanation").textContent =
+        "Expectation change contributes about " +
+        Math.round(expectationContribution) +
+        " points. Pivotality contributes about " +
+        Math.round(pivotalityContribution) +
+        " points. The baseline is 50.";
+    }
+
+    /* Initialize */
+    updateGoalie();
+    updatePivotality();
+    updateModel();
+  </script>
+</body>
+</html>
