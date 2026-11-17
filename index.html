@@ -293,22 +293,33 @@
         grid-template-columns: 75px 1fr 44px;
       }
     }
+    .data-row { display:grid; grid-template-columns: 1fr auto; gap:6px 14px; margin:6px 0; }
+    .data-row span:last-child { font-weight:800; text-align:right; }
+    .seg { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 14px; }
+    .seg .choice { flex:1 1 70px; text-align:center; padding:10px; }
+    .marker-wrap { position:relative; }
+    .model-tick { position:absolute; top:-3px; width:3px; height:20px; background:#fff; border-radius:2px; transition:left .25s ease; }
+    table.mini { width:100%; border-collapse:collapse; font-size:.92rem; }
+    table.mini td, table.mini th { padding:6px 8px; border-bottom:1px solid var(--border); text-align:left; }
+    .legend { font-size:.88rem; color:var(--muted); margin-top:6px; }
+    .legend b { color:var(--text); }
   </style>
 </head>
 <body>
   <header>
     <h1>Lucky or clever?</h1>
     <p class="subtitle">
-      An interactive simplifier for the paper <strong>“Lucky or clever? From expectations to responsibility judgments”</strong>.
-      The paper argues that responsibility judgments depend on two things: what an action reveals about a person, and whether the action actually made a difference.
+      An interactive guide to Gerstenberg, Ullman, Nagel, Kleiman-Weiner, Lagnado &amp; Tenenbaum (2018),
+      <strong>"Lucky or clever? From expectations to responsibility judgments"</strong>, <em>Cognition</em> 177, 122-141.
+      The paper argues that how much we credit or blame someone depends on two things: what their action reveals about the kind of person they are, and how close their action was to making the difference to the outcome.
     </p>
   </header>
 
   <nav>
     <button class="tab-button active" data-tab="idea" onclick="showTab('idea')">Big idea</button>
     <button class="tab-button" data-tab="demo" onclick="showTab('demo')">Goalie vs. spinner</button>
-    <button class="tab-button" data-tab="pivotality" onclick="showTab('pivotality')">Did it matter?</button>
-    <button class="tab-button" data-tab="model" onclick="showTab('model')">Model</button>
+    <button class="tab-button" data-tab="pivotality" onclick="showTab('pivotality')">Gardener: did it matter?</button>
+    <button class="tab-button" data-tab="model" onclick="showTab('model')">Run the model</button>
     <button class="tab-button" data-tab="takeaways" onclick="showTab('takeaways')">Takeaways</button>
   </nav>
 
@@ -317,231 +328,214 @@
     <section id="idea" class="tab active">
       <div class="grid">
         <div class="card">
-          <h2>The paper’s core question</h2>
-          <p>
-            When someone’s action leads to a good or bad outcome, how much credit or blame should they receive?
-          </p>
-          <p class="muted">
-            A surprising puzzle: sometimes people get <strong>more</strong> responsibility for unexpected actions, but sometimes they get <strong>less</strong>. This page simplifies why.
-          </p>
+          <h2>The puzzle</h2>
+          <p>Most theories say people are held <strong>more</strong> responsible when they act unexpectedly. But Johnson &amp; Rips (2015) found people were sometimes held more responsible for positive outcomes of <strong>expected</strong>, optimal choices.</p>
+          <p class="muted">The paper resolves this: whether an unexpected action earns more or less credit depends on whether it is diagnostic of good or bad <em>future</em> performance.</p>
         </div>
 
         <div class="card">
-          <h2>Two mental ingredients</h2>
+          <h2>Two processes</h2>
           <ul>
-            <li>
-              <strong>Expectation change:</strong> What does the action reveal about the person? Are they skilled, average, or unskilled?
-            </li>
-            <li>
-              <strong>Pivotality:</strong> Did the action actually make a difference to the outcome?
-            </li>
+            <li><strong>Dispositional inference (person-centred):</strong> from the action and outcome, infer what type of agent this is, then ask how much our expectation of their future success has changed relative to our prior.</li>
+            <li><strong>Causal attribution (action-centred):</strong> how close was the action to being pivotal, i.e. would the outcome have been different had they chosen otherwise?</li>
           </ul>
         </div>
 
         <div class="card">
-          <h2>Simplified formula</h2>
+          <h2>Three agent types</h2>
+          <ul>
+            <li><strong>Average:</strong> chooses using only the base-rate probabilities.</li>
+            <li><strong>Skilled:</strong> can read a cue about what will actually happen this time, and uses it correctly.</li>
+            <li><strong>Unskilled ("bad"):</strong> thinks they can read the cue but uses it the wrong way round, so does <em>worse</em> than chance.</li>
+          </ul>
+          <p class="muted">All three choose noisily (softmax, fitted β = 1.5).</p>
+        </div>
+
+        <div class="card">
+          <h2>The model (Eq. 10)</h2>
           <div class="formula">
-            Responsibility ≈ expectation change + pivotality
+            Responsibility = α<br/>
+            &nbsp;&nbsp;+ w1 × (difference in expected future reward)<br/>
+            &nbsp;&nbsp;+ w2 × (pivotality)
           </div>
-          <p class="muted">
-            In the actual paper, the model is more formal and quantitative, but the core intuition is this:
-            we judge people by what their action teaches us about them, and by how causally important their action was.
-          </p>
+          <p class="muted">Fitted α = 6, w1 = 28, w2 = 28 (on normalised predictors). The equal weights mean participants cared about both factors about equally. Pivotality = 1/(N+1), where N is the minimal number of changes needed to make the action pivotal.</p>
         </div>
       </div>
     </section>
 
     <!-- GOALIE VS SPINNER -->
     <section id="demo" class="tab">
-      <h2>Goalie vs. spinner</h2>
+      <h2>Goalie vs. spinner (Experiment 2)</h2>
       <p class="muted">
-        In the goalie world, an unexpected save can reveal skill. In the spinner world, an unexpected win may just be luck.
-        Change the probability and outcome to see how credit or blame changes.
+        A goalkeeper chooses which way to jump knowing the striker's tendency; a game-show contestant predicts where a spinner will land.
+        The structure is identical - only the plausibility of <em>skill</em> differs. Values below are the paper's actual data (Appendix C, Tables C1 and C2).
       </p>
 
       <div class="grid">
         <div class="card">
-          <h3>Scenario controls</h3>
-
-          <div class="choice-grid">
-            <button class="choice world-btn selected" data-world="goalie" onclick="setWorld('goalie')">
-              Goalie world: skill is plausible
-            </button>
-            <button class="choice world-btn" data-world="spinner" onclick="setWorld('spinner')">
-              Spinner world: mostly luck
-            </button>
+          <h3>Scenario</h3>
+          <label>World</label>
+          <div class="seg">
+            <button class="choice world-btn selected" data-world="goalie" onclick="setWorld('goalie')">Goalie (skill plausible)</button>
+            <button class="choice world-btn" data-world="spinner" onclick="setWorld('spinner')">Spinner (game of chance)</button>
           </div>
 
-          <label for="probSlider">
-            Chance that the chosen action succeeds: <span id="probValue">20%</span>
-          </label>
-          <input id="probSlider" type="range" min="20" max="80" step="5" value="20" oninput="updateGoalie()" />
-
-          <div class="choice-grid">
-            <button class="choice outcome-btn selected" data-outcome="success" onclick="setOutcome('success')">
-              Outcome: success
-            </button>
-            <button class="choice outcome-btn" data-outcome="failure" onclick="setOutcome('failure')">
-              Outcome: failure
-            </button>
+          <label>Chance the chosen action succeeds</label>
+          <div class="seg">
+            <button class="choice prob-btn selected" data-prob="20" onclick="setProb(20)">20%</button>
+            <button class="choice prob-btn" data-prob="40" onclick="setProb(40)">40%</button>
+            <button class="choice prob-btn" data-prob="60" onclick="setProb(60)">60%</button>
+            <button class="choice prob-btn" data-prob="80" onclick="setProb(80)">80%</button>
           </div>
 
-          <p class="note">
-            “Expected” means the chosen action had a high chance of success. “Unexpected” means it had a low chance of success.
-          </p>
+          <label>Outcome</label>
+          <div class="seg">
+            <button class="choice outcome-btn selected" data-outcome="1" onclick="setOutcome(1)">Success (credit)</button>
+            <button class="choice outcome-btn" data-outcome="0" onclick="setOutcome(0)">Failure (blame)</button>
+          </div>
+
+          <p class="note">20% and 40% are "unexpected" actions; 60% and 80% are "expected". In these worlds the action is always pivotal - with two options, choosing the other one would always have flipped the outcome.</p>
         </div>
 
         <div class="card">
           <h3>Responsibility judgment</h3>
-          <div id="actionBadge" class="badge">Unexpected action · 20% chance</div>
-          <div id="responsibilityLabel" class="large-result">Credit: 85 / 100</div>
-          <div class="bar-wrap">
-            <div id="responsibilityBar" class="bar-fill credit" style="width: 85%"></div>
+          <div id="actionBadge" class="badge"></div>
+          <div id="responsibilityLabel" class="large-result"></div>
+          <div class="marker-wrap">
+            <div class="bar-wrap"><div id="responsibilityBar" class="bar-fill credit"></div></div>
+            <div id="respTick" class="model-tick"></div>
           </div>
+          <p class="legend">Bar = participants' mean rating (0-100). <b>White tick</b> = model prediction: <span id="respModel"></span></p>
           <p id="responsibilityExplanation" class="muted"></p>
         </div>
 
         <div class="card">
-          <h3>What the action reveals</h3>
-
-          <div class="agent-row">
-            <div>Skilled</div>
-            <div class="agent-bar-wrap">
-              <div id="skilledBar" class="agent-bar-fill skilled" style="width: 70%"></div>
-            </div>
-            <div id="skilledText">70%</div>
-          </div>
-
-          <div class="agent-row">
-            <div>Average</div>
-            <div class="agent-bar-wrap">
-              <div id="averageBar" class="agent-bar-fill average" style="width: 20%"></div>
-            </div>
-            <div id="averageText">20%</div>
-          </div>
-
-          <div class="agent-row">
-            <div>Unskilled</div>
-            <div class="agent-bar-wrap">
-              <div id="unskilledBar" class="agent-bar-fill unskilled" style="width: 10%"></div>
-            </div>
-            <div id="unskilledText">10%</div>
-          </div>
-
-          <p class="note">
-            This is a simplified inference panel. The paper’s formal model uses Bayesian updating to infer what type of person the agent is likely to be.
-          </p>
+          <h3>What participants inferred about the agent</h3>
+          <div class="agent-row"><div>Skilled</div><div class="agent-bar-wrap"><div id="skilledBar" class="agent-bar-fill skilled"></div></div><div id="skilledText"></div></div>
+          <div class="agent-row"><div>Average</div><div class="agent-bar-wrap"><div id="averageBar" class="agent-bar-fill average"></div></div><div id="averageText"></div></div>
+          <div class="agent-row"><div>Unskilled</div><div class="agent-bar-wrap"><div id="unskilledBar" class="agent-bar-fill unskilled"></div></div><div id="unskilledText"></div></div>
+          <p class="legend">Participants' mean posterior judgments. Model's Bayesian prediction: <span id="agentModel"></span></p>
+          <p class="note">Difference in expected future reward (model): <strong id="diffText"></strong>. Positive means the person now looks better than a typical agent in this world; negative means worse.</p>
         </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h3>Experiment 1 vs. Experiment 2</h3>
+        <p class="muted">
+          In Experiment 1 (agent types not described), goalies got more credit for unexpected saves, while spinner players got <em>less</em> credit for unexpected wins.
+          In Experiment 2, once participants were told skilled spinner players exist, spinner credit became roughly flat across probabilities. A cluster analysis showed why: one subgroup (35% of the spinner group, 22% of the goalie group) stayed sceptical about skill and favoured expected wins, while the other credited unexpected wins more. Blame rose with how unexpected the action was in both worlds and both experiments, and both blame and credit were higher overall in the goalie world.
+        </p>
       </div>
     </section>
 
-    <!-- PIVOTALITY -->
+    <!-- GARDENER -->
     <section id="pivotality" class="tab">
-      <h2>Did the action make a difference?</h2>
+      <h2>Gardener: did the choice make a difference? (Experiment 3)</h2>
       <p class="muted">
-        This demo simplifies the gardener experiment. A gardener chooses between two fertilizers.
-        Responsibility is stronger when the gardener’s choice was pivotal — when choosing differently would have changed the outcome.
+        A gardener picks one of two fertilizers: one makes the flower grow 70% of the time, the other 30%. Participants were also told what <em>would</em> have happened with the other fertilizer.
+        If the outcome would have been the same either way, the choice was not pivotal (pivotality = 1/2, since one change would have made it pivotal). Values are the paper's data (Tables C1 and C2).
       </p>
 
       <div class="grid">
         <div class="card">
-          <h3>Gardener controls</h3>
-
+          <h3>Situation</h3>
           <label>Decision</label>
-          <div class="choice-grid">
-            <button class="choice pivot-choice-btn" data-choice="expected" onclick="setPivotChoice(true)">
-              Expected decision: chose the better fertilizer
-            </button>
-            <button class="choice pivot-choice-btn selected" data-choice="unexpected" onclick="setPivotChoice(false)">
-              Unexpected decision: chose the worse fertilizer
-            </button>
+          <div class="seg">
+            <button class="choice pivot-choice-btn" data-choice="70" onclick="setPivotChoice(70)">Expected: 70% fertilizer</button>
+            <button class="choice pivot-choice-btn selected" data-choice="30" onclick="setPivotChoice(30)">Unexpected: 30% fertilizer</button>
           </div>
-
           <label>Outcome</label>
-          <div class="choice-grid">
-            <button class="choice pivot-outcome-btn selected" data-pivot-outcome="good" onclick="setPivotOutcome('good')">
-              Flower grows
-            </button>
-            <button class="choice pivot-outcome-btn" data-pivot-outcome="bad" onclick="setPivotOutcome('bad')">
-              Flower dies
-            </button>
+          <div class="seg">
+            <button class="choice pivot-outcome-btn selected" data-pivot-outcome="1" onclick="setPivotOutcome(1)">Flower grows</button>
+            <button class="choice pivot-outcome-btn" data-pivot-outcome="0" onclick="setPivotOutcome(0)">Flower dies</button>
           </div>
-
-          <label>Pivotality</label>
-          <div class="choice-grid">
-            <button class="choice pivotal-btn selected" data-pivotal="yes" onclick="setPivotPivotal(true)">
-              Pivotal: the other fertilizer would have changed the outcome
-            </button>
-            <button class="choice pivotal-btn" data-pivotal="no" onclick="setPivotPivotal(false)">
-              Not pivotal: the outcome would have happened anyway
-            </button>
+          <label>Would the other fertilizer have changed the outcome?</label>
+          <div class="seg">
+            <button class="choice pivotal-btn selected" data-pivotal="1" onclick="setPivotPivotal(true)">Yes - pivotal</button>
+            <button class="choice pivotal-btn" data-pivotal="0" onclick="setPivotPivotal(false)">No - same outcome anyway</button>
           </div>
         </div>
 
         <div class="card">
           <h3>Result</h3>
           <div id="pivotEmoji" class="emoji">🌼</div>
-          <div id="pivotBadge" class="badge">Unexpected decision · pivotal</div>
-          <div id="pivotLabel" class="large-result">Credit: 90 / 100</div>
-          <div class="bar-wrap">
-            <div id="pivotBar" class="bar-fill credit" style="width: 90%"></div>
+          <div id="pivotBadge" class="badge"></div>
+          <div id="pivotLabel" class="large-result"></div>
+          <div class="marker-wrap">
+            <div class="bar-wrap"><div id="pivotBar" class="bar-fill credit"></div></div>
+            <div id="pivotTick" class="model-tick"></div>
           </div>
+          <p class="legend">Bar = participants' mean rating. <b>White tick</b> = model prediction: <span id="pivotModel"></span></p>
           <p id="pivotExplanation" class="muted"></p>
+        </div>
+
+        <div class="card">
+          <h3>Agent inference</h3>
+          <div class="agent-row"><div>Skilled</div><div class="agent-bar-wrap"><div id="gSkilledBar" class="agent-bar-fill skilled"></div></div><div id="gSkilledText"></div></div>
+          <div class="agent-row"><div>Average</div><div class="agent-bar-wrap"><div id="gAverageBar" class="agent-bar-fill average"></div></div><div id="gAverageText"></div></div>
+          <div class="agent-row"><div>Bad</div><div class="agent-bar-wrap"><div id="gUnskilledBar" class="agent-bar-fill unskilled"></div></div><div id="gUnskilledText"></div></div>
+          <p class="legend">Participants' means. Model: <span id="gAgentModel"></span></p>
+          <p class="note">Pivotality effects were larger for unexpected decisions than for expected ones, for both blame and credit - a significant interaction, not a fixed bonus.</p>
         </div>
       </div>
     </section>
 
     <!-- MODEL -->
     <section id="model" class="tab">
-      <h2>The simplified model</h2>
+      <h2>Run the model</h2>
       <p class="muted">
-        Move the sliders to see how expectation change and pivotality combine. This is a teaching version, not the exact quantitative model from the paper.
+        This runs the paper's model: Bayesian inference over the three agent types, the change in expected future reward, and pivotality, combined with a linear mapping that reproduces the paper's Table C2 predictions to within 1 point.
       </p>
 
       <div class="grid">
         <div class="card">
           <h3>Inputs</h3>
+          <label>Prior over agent types (inferred from participants, Table A1)</label>
+          <div class="seg">
+            <button class="choice prior-btn selected" data-prior="goalie" onclick="setPrior('goalie')">Goalie</button>
+            <button class="choice prior-btn" data-prior="spinner" onclick="setPrior('spinner')">Spinner</button>
+            <button class="choice prior-btn" data-prior="gardener" onclick="setPrior('gardener')">Gardener</button>
+          </div>
 
-          <label for="expectationSlider">
-            Expectation change: <span id="expectationValue">+50</span>
-          </label>
-          <input id="expectationSlider" type="range" min="-100" max="100" step="5" value="50" oninput="updateModel()" />
-          <p class="muted">
-            Negative means the person looks worse than expected. Positive means the person looks better than expected.
-          </p>
+          <label for="pSkilled">Prior: skilled <span id="pSkilledVal"></span></label>
+          <input id="pSkilled" type="range" min="0.02" max="0.9" step="0.01" oninput="customPrior()" />
+          <label for="pUnskilled">Prior: unskilled <span id="pUnskilledVal"></span></label>
+          <input id="pUnskilled" type="range" min="0.02" max="0.9" step="0.01" oninput="customPrior()" />
+          <p class="muted" style="margin-top:-6px">Prior: average = <span id="pAverageVal"></span> (remainder)</p>
 
-          <label for="pivotalitySlider">
-            Pivotality: <span id="pivotalityValue">80%</span>
-          </label>
-          <input id="pivotalitySlider" type="range" min="0" max="100" step="5" value="80" oninput="updateModel()" />
-          <p class="muted">
-            Higher means the action made more of a difference to the outcome.
-          </p>
+          <label for="mProb">Chance the chosen action succeeds: <span id="mProbVal"></span></label>
+          <input id="mProb" type="range" min="10" max="90" step="5" value="20" oninput="updateModel()" />
 
-          <label for="weightExpectation">
-            Weight on expectation change: <span id="weightExpectationValue">0.70</span>
-          </label>
-          <input id="weightExpectation" type="range" min="0" max="1" step="0.05" value="0.70" oninput="updateModel()" />
-
-          <label for="weightPivotality">
-            Weight on pivotality: <span id="weightPivotalityValue">0.50</span>
-          </label>
-          <input id="weightPivotality" type="range" min="0" max="1" step="0.05" value="0.50" oninput="updateModel()" />
+          <label>Outcome</label>
+          <div class="seg">
+            <button class="choice m-out-btn selected" data-mout="1" onclick="setMOut(1)">Success</button>
+            <button class="choice m-out-btn" data-mout="0" onclick="setMOut(0)">Failure</button>
+          </div>
+          <label>Pivotality</label>
+          <div class="seg">
+            <button class="choice m-piv-btn selected" data-mpiv="1" onclick="setMPiv(1)">Pivotal (1)</button>
+            <button class="choice m-piv-btn" data-mpiv="0.5" onclick="setMPiv(0.5)">One change away (1/2)</button>
+          </div>
         </div>
 
         <div class="card">
-          <h3>Predicted responsibility</h3>
-          <div id="modelLabel" class="large-result">Credit: 76 / 100</div>
-          <div class="bar-wrap">
-            <div id="modelBar" class="bar-fill credit" style="width: 76%"></div>
-          </div>
+          <h3>Model output</h3>
+          <div id="modelLabel" class="large-result"></div>
+          <div class="bar-wrap"><div id="modelBar" class="bar-fill credit"></div></div>
+          <table class="mini" style="margin-top:12px">
+            <tr><th></th><th>Prior</th><th>Posterior</th></tr>
+            <tr><td>Skilled</td><td id="tPs"></td><td id="tQs"></td></tr>
+            <tr><td>Average</td><td id="tPa"></td><td id="tQa"></td></tr>
+            <tr><td>Unskilled</td><td id="tPu"></td><td id="tQu"></td></tr>
+            <tr><td>Expected future reward</td><td id="tEp"></td><td id="tEq"></td></tr>
+          </table>
           <p id="modelExplanation" class="muted"></p>
-
-          <div class="formula">
-            Responsibility ≈ 50<br />
-            &nbsp;&nbsp;+ weight × expectation change<br />
-            &nbsp;&nbsp;+ weight × pivotality
+          <div class="formula" style="font-size:.9rem">
+            P(type | action) ∝ P(action | type) × P(type)<br/>
+            Expected reward: unskilled 0, average 0.63, skilled 1 (rescaled)<br/>
+            Responsibility ≈ 7 + 153 × Δreward + 34 × pivotality
           </div>
+          <p class="legend">The last line is the paper's Eq. 10 rewritten on raw (unnormalised) values; positive = credit, negative = blame. Blame uses negative pivotality, as in Table C2.</p>
         </div>
       </div>
     </section>
@@ -549,338 +543,172 @@
     <!-- TAKEAWAYS -->
     <section id="takeaways" class="tab">
       <h2>Key takeaways</h2>
-
       <div class="grid">
-        <div class="card">
-          <h3>1. Unexpected does not always mean more responsibility</h3>
-          <p class="muted">
-            The paper resolves a puzzle: unexpected actions can receive more responsibility when they reveal skill, but less when they reveal poor judgment or luck.
-          </p>
-        </div>
-
-        <div class="card">
-          <h3>2. Credit depends on what the action reveals</h3>
-          <p class="muted">
-            If an unexpected success makes the person look skilled, they get more credit. If it just looks like luck, they get less credit.
-          </p>
-        </div>
-
-        <div class="card">
-          <h3>3. Blame increases when unexpected actions fail</h3>
-          <p class="muted">
-            If someone takes a risky or unexpected action and fails, observers often infer poor decision-making or lack of skill, increasing blame.
-          </p>
-        </div>
-
-        <div class="card">
-          <h3>4. Causal impact matters</h3>
-          <p class="muted">
-            People are held more responsible when their action was pivotal — when the outcome would have been different if they had chosen differently.
-          </p>
-        </div>
-
-        <div class="card">
-          <h3>5. Responsibility combines person and action</h3>
-          <p class="muted">
-            The paper’s model combines a person-centered process — updating expectations about the agent — with an action-centered process — evaluating causal pivotality.
-          </p>
-        </div>
+        <div class="card"><h3>1. No direct link from "unexpected" to responsibility</h3><p class="muted">An unexpected success earns more credit when it signals skill (goalies, gardeners) and less when it looks like a lucky bad decision (spinner players in Experiment 1). What matters is what the action predicts about future performance.</p></div>
+        <div class="card"><h3>2. Unexpected failures are blamed more - everywhere</h3><p class="muted">Across all worlds, failing after an unlikely choice is diagnostic of an unskilled agent, so blame rises the less likely the chosen action was to succeed.</p></div>
+        <div class="card"><h3>3. Pivotality matters on top of inference</h3><p class="muted">Gardeners were blamed and credited more when their choice actually made the difference, even where participants' inferences about the agent were similar - and this effect was larger for unexpected choices.</p></div>
+        <div class="card"><h3>4. Both components are needed</h3><p class="muted">Across Experiments 2-3 the full model fit well (cross-validated r = .86, BIC 158.6) and beat a difference-only model (r = .70), a pivotality-only model (r = .63), and an optimality model in the style of Johnson &amp; Rips (r = .66).</p></div>
+        <div class="card"><h3>5. People differ in how plausible they think skill is</h3><p class="muted">The flat average credit in the Experiment 2 spinner world hides two subgroups with opposite patterns, each consistent with its own agent inferences.</p></div>
+        <div class="card"><h3>6. Limits</h3><p class="muted">Achievement contexts only, agents differing only in skill, a single action per person, and online US participants (MTurk). The comparison standard (this person vs. a reasonable person) was not tested, and moral character was not modelled.</p></div>
       </div>
     </section>
   </main>
 
   <footer>
-    Simplified interactive explainer based on Gerstenberg et al. (2018), <em>Lucky or clever? From expectations to responsibility judgments</em>.
-    The interactive calculations are intentionally simplified for teaching purposes.
+    Based on Gerstenberg, T., Ullman, T. D., Nagel, J., Kleiman-Weiner, M., Lagnado, D. A., &amp; Tenenbaum, J. B. (2018). Lucky or clever? From expectations to responsibility judgments. <em>Cognition, 177</em>, 122-141. <a href="https://doi.org/10.1016/j.cognition.2018.03.019" style="color:var(--blue)">doi:10.1016/j.cognition.2018.03.019</a>.
+    Scenario values are taken from the paper's Appendix C (Experiments 2 and 3). Materials and data: <a href="https://osf.io/2x3ve/" style="color:var(--blue)">osf.io/2x3ve</a>.
   </footer>
 
   <script>
-    function clamp(value, min, max) {
-      return Math.max(min, Math.min(max, value));
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+    function $(id) { return document.getElementById(id); }
+    function sel(cls, attr, val) {
+      document.querySelectorAll("." + cls).forEach(function (b) { b.classList.toggle("selected", b.dataset[attr] === String(val)); });
     }
-
     function showTab(tabId) {
-      document.querySelectorAll(".tab").forEach(function (section) {
-        section.classList.remove("active");
-      });
-
-      document.querySelectorAll(".tab-button").forEach(function (button) {
-        button.classList.remove("active");
-      });
-
-      document.getElementById(tabId).classList.add("active");
+      document.querySelectorAll(".tab").forEach(function (s) { s.classList.remove("active"); });
+      document.querySelectorAll(".tab-button").forEach(function (b) { b.classList.remove("active"); });
+      $(tabId).classList.add("active");
       document.querySelector('[data-tab="' + tabId + '"]').classList.add("active");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    /* Goalie vs spinner state */
-    let world = "goalie";
-    let outcome = "success";
+    /* Paper data, Appendix C. Agent arrays are [bad/unskilled, average, skilled] in %.
+       Responsibility: diff = model difference in expected reward, pred = model prediction, rating = participants' mean (signed: negative = blame). */
+    var EXP2 = {
+      goalie: {
+        "20-0": { model: [53.53, 31.63, 14.85], emp: [61.44, 24.05, 14.51], diff: -0.28, pred: -70.35, rating: -76.84 },
+        "40-0": { model: [46.87, 40.13, 13.00], emp: [47.07, 35.37, 17.56], diff: -0.18, pred: -54.55, rating: -62.29 },
+        "60-0": { model: [41.29, 47.25, 11.45], emp: [29.27, 53.29, 17.44], diff: -0.07, pred: -37.21, rating: -42.50 },
+        "80-0": { model: [37.21, 52.46, 10.32], emp: [33.41, 47.49, 19.10], diff: -0.09, pred: -40.31, rating: -32.24 },
+        "20-1": { model: [11.69, 29.43, 58.88], emp: [12.32, 19.51, 68.17], diff: 0.23, pred: 75.47, rating: 76.50 },
+        "40-1": { model: [10.32, 37.67, 52.00], emp: [12.39, 32.20, 55.41], diff: 0.18, pred: 68.08, rating: 73.00 },
+        "60-1": { model: [9.16, 44.68, 46.15], emp: [11.10, 54.02, 34.88], diff: 0.11, pred: 57.55, rating: 64.60 },
+        "80-1": { model: [8.30, 49.88, 41.82], emp: [12.56, 54.88, 32.56], diff: 0.09, pred: 54.79, rating: 60.95 }
+      },
+      spinner: {
+        "20-0": { model: [53.90, 33.46, 12.63], emp: [59.90, 29.66, 10.44], diff: -0.27, pred: -68.13, rating: -60.85 },
+        "40-0": { model: [46.86, 42.16, 10.98], emp: [36.66, 49.49, 13.85], diff: -0.11, pred: -43.44, rating: -50.46 },
+        "60-0": { model: [41.04, 49.34, 9.62], emp: [32.39, 47.05, 20.56], diff: -0.06, pred: -35.41, rating: -34.10 },
+        "80-0": { model: [36.82, 54.55, 8.63], emp: [32.15, 40.71, 27.15], diff: -0.03, pred: -31.39, rating: -29.43 },
+        "20-1": { model: [12.66, 33.48, 53.86], emp: [23.20, 19.54, 57.27], diff: 0.14, pred: 61.63, rating: 54.62 },
+        "40-1": { model: [11.00, 42.18, 46.82], emp: [21.27, 33.46, 45.27], diff: 0.10, pred: 56.63, rating: 56.27 },
+        "60-1": { model: [9.63, 49.36, 41.00], emp: [9.10, 60.22, 30.68], diff: 0.13, pred: 60.16, rating: 62.98 },
+        "80-1": { model: [8.64, 54.57, 36.79], emp: [8.59, 60.17, 31.24], diff: 0.13, pred: 60.98, rating: 63.49 }
+      }
+    };
+    var EXP3 = {
+      "30-0-0": { model: [33.36, 30.05, 36.60], emp: [54.10, 25.12, 20.78], diff: -0.20, pred: -40.37, rating: -35.56 },
+      "30-0-1": { model: [55.14, 30.66, 14.20], emp: [60.98, 25.44, 13.59], diff: -0.27, pred: -67.97, rating: -73.68 },
+      "70-0-0": { model: [26.99, 43.41, 29.61], emp: [31.56, 46.15, 22.29], diff: -0.05, pred: -17.37, rating: -20.27 },
+      "70-0-1": { model: [44.44, 44.12, 11.44], emp: [33.66, 49.27, 17.07], diff: -0.08, pred: -39.15, rating: -32.88 },
+      "30-1-0": { model: [33.36, 30.05, 36.60], emp: [23.88, 26.49, 49.63], diff: 0.10, pred: 39.25, rating: 41.85 },
+      "30-1-1": { model: [12.43, 29.46, 58.11], emp: [12.44, 17.80, 69.76], diff: 0.25, pred: 78.69, rating: 77.29 },
+      "70-1-0": { model: [26.99, 43.41, 29.61], emp: [14.66, 43.85, 41.49], diff: 0.13, pred: 43.66, rating: 39.61 },
+      "70-1-1": { model: [10.10, 42.71, 47.19], emp: [13.90, 52.32, 33.78], diff: 0.10, pred: 56.76, rating: 52.27 }
+    };
 
-    function setWorld(selectedWorld) {
-      world = selectedWorld;
-
-      document.querySelectorAll(".world-btn").forEach(function (button) {
-        button.classList.toggle("selected", button.dataset.world === selectedWorld);
-      });
-
-      updateGoalie();
+    function fmtAgents(a) { return "skilled " + a[2].toFixed(0) + "%, average " + a[1].toFixed(0) + "%, unskilled " + a[0].toFixed(0) + "%"; }
+    function setBars(prefix, a) {
+      var ids = prefix ? ["g" + "Skilled", "g" + "Average", "g" + "Unskilled"] : ["skilled", "average", "unskilled"];
+      var vals = [a[2], a[1], a[0]];
+      ids.forEach(function (id, i) { $(id + "Bar").style.width = vals[i] + "%"; $(id + "Text").textContent = Math.round(vals[i]) + "%"; });
+    }
+    function setResp(barId, tickId, labelId, d) {
+      var credit = d.rating > 0, mag = Math.abs(d.rating), pm = Math.abs(d.pred);
+      $(labelId).textContent = (credit ? "Credit: " : "Blame: ") + Math.round(mag) + " / 100";
+      var bar = $(barId); bar.style.width = mag + "%"; bar.className = "bar-fill " + (credit ? "credit" : "blame");
+      $(tickId).style.left = "calc(" + clamp(pm, 0, 100) + "% - 1px)";
+      return Math.round(pm);
     }
 
-    function setOutcome(selectedOutcome) {
-      outcome = selectedOutcome;
-
-      document.querySelectorAll(".outcome-btn").forEach(function (button) {
-        button.classList.toggle("selected", button.dataset.outcome === selectedOutcome);
-      });
-
-      updateGoalie();
-    }
-
+    /* Goalie vs spinner */
+    var world = "goalie", prob = 20, outcome = 1;
+    function setWorld(w) { world = w; sel("world-btn", "world", w); updateGoalie(); }
+    function setProb(p) { prob = p; sel("prob-btn", "prob", p); updateGoalie(); }
+    function setOutcome(o) { outcome = o; sel("outcome-btn", "outcome", o); updateGoalie(); }
     function updateGoalie() {
-      const p = Number(document.getElementById("probSlider").value);
-      const expected = p >= 50;
-
-      document.getElementById("probValue").textContent = p + "%";
-
-      const actionBadge = document.getElementById("actionBadge");
-      actionBadge.textContent =
-        (expected ? "Expected action" : "Unexpected action") + " · " + p + "% chance";
-
-      let responsibility;
-      let tone;
-      let explanation;
-
-      if (outcome === "success") {
-        tone = "credit";
-
-        if (world === "goalie") {
-          responsibility = 55 + (50 - p);
-          explanation =
-            "In the goalie world, an unexpected success can reveal skill. Saving a low-probability shot can make the goalie look clever, so credit can increase.";
-        } else {
-          responsibility = 55 + (p - 50);
-          explanation =
-            "In the spinner world, unexpected success may be luck. Choosing the more probable outcome looks like better decision-making, so credit tends to favor the expected choice.";
-        }
+      var d = EXP2[world][prob + "-" + outcome], expected = prob >= 50;
+      $("actionBadge").textContent = (expected ? "Expected action" : "Unexpected action") + " · " + prob + "% chance";
+      $("respModel").textContent = setResp("responsibilityBar", "respTick", "responsibilityLabel", d) + " / 100";
+      setBars(false, d.emp);
+      $("agentModel").textContent = fmtAgents(d.model);
+      $("diffText").textContent = (d.diff > 0 ? "+" : "") + d.diff.toFixed(2);
+      var ex;
+      if (outcome === 0) {
+        ex = "Failing after choosing a " + prob + "% option. The less likely the chosen action was to work, the more the failure points to an unskilled agent - so blame is highest for unexpected failures in both worlds.";
+        if (world === "goalie" && prob === 80) ex += " The model predicts slightly more blame at 80% than 60% (participants judged the 80% goalie a little more likely to be unskilled), though actual ratings did not show this.";
+      } else if (world === "goalie") {
+        ex = "In the goalie world, saving a shot in the unlikely direction is read as skill (anticipating the striker), so credit falls as the action becomes more expected.";
       } else {
-        tone = "blame";
-        responsibility = 55 + (50 - p);
-        explanation =
-          "When a low-probability action fails, it suggests poor judgment or lack of skill. Unexpected failures therefore receive more blame.";
+        ex = "In the spinner world, credit in Experiment 2 was roughly flat across probabilities: participants were split on whether an unlikely correct guess reflects skill or luck. In Experiment 1, before agent types were described, unexpected wins got less credit than expected ones.";
       }
-
-      responsibility = clamp(Math.round(responsibility), 5, 95);
-
-      const label = tone === "credit" ? "Credit" : "Blame";
-      document.getElementById("responsibilityLabel").textContent =
-        label + ": " + responsibility + " / 100";
-
-      const bar = document.getElementById("responsibilityBar");
-      bar.style.width = responsibility + "%";
-      bar.className = "bar-fill " + tone;
-
-      document.getElementById("responsibilityExplanation").textContent = explanation;
-
-      /* Simplified agent inference */
-      let skilled;
-      let average;
-      let unskilled;
-
-      if (outcome === "success") {
-        if (expected) {
-          if (world === "goalie") {
-            skilled = 35;
-            average = 50;
-            unskilled = 15;
-          } else {
-            skilled = 20;
-            average = 60;
-            unskilled = 20;
-          }
-        } else {
-          if (world === "goalie") {
-            skilled = 70;
-            average = 20;
-            unskilled = 10;
-          } else {
-            skilled = 30;
-            average = 45;
-            unskilled = 25;
-          }
-        }
-      } else {
-        if (expected) {
-          skilled = 15;
-          average = 55;
-          unskilled = 30;
-        } else {
-          skilled = 10;
-          average = 20;
-          unskilled = 70;
-        }
-      }
-
-      document.getElementById("skilledBar").style.width = skilled + "%";
-      document.getElementById("averageBar").style.width = average + "%";
-      document.getElementById("unskilledBar").style.width = unskilled + "%";
-
-      document.getElementById("skilledText").textContent = skilled + "%";
-      document.getElementById("averageText").textContent = average + "%";
-      document.getElementById("unskilledText").textContent = unskilled + "%";
+      $("responsibilityExplanation").textContent = ex;
     }
 
-    /* Pivotality state */
-    let pivotChoiceExpected = false;
-    let pivotOutcome = "good";
-    let pivotPivotal = true;
-
-    function setPivotChoice(isExpected) {
-      pivotChoiceExpected = isExpected;
-
-      document.querySelectorAll(".pivot-choice-btn").forEach(function (button) {
-        const buttonValue = button.dataset.choice === "expected";
-        button.classList.toggle("selected", buttonValue === isExpected);
-      });
-
-      updatePivotality();
-    }
-
-    function setPivotOutcome(selectedOutcome) {
-      pivotOutcome = selectedOutcome;
-
-      document.querySelectorAll(".pivot-outcome-btn").forEach(function (button) {
-        button.classList.toggle("selected", button.dataset.pivotOutcome === selectedOutcome);
-      });
-
-      updatePivotality();
-    }
-
-    function setPivotPivotal(isPivotal) {
-      pivotPivotal = isPivotal;
-
-      document.querySelectorAll(".pivotal-btn").forEach(function (button) {
-        const buttonValue = button.dataset.pivotal === "yes";
-        button.classList.toggle("selected", buttonValue === isPivotal);
-      });
-
-      updatePivotality();
-    }
-
+    /* Gardener */
+    var gChoice = 30, gOut = 1, gPiv = true;
+    function setPivotChoice(c) { gChoice = c; sel("pivot-choice-btn", "choice", c); updatePivotality(); }
+    function setPivotOutcome(o) { gOut = o; sel("pivot-outcome-btn", "pivotOutcome", o); updatePivotality(); }
+    function setPivotPivotal(p) { gPiv = p; sel("pivotal-btn", "pivotal", p ? 1 : 0); updatePivotality(); }
     function updatePivotality() {
-      let responsibility;
-      let tone;
-      let explanation;
-
-      if (pivotOutcome === "good") {
-        tone = "credit";
-
-        if (pivotChoiceExpected) {
-          responsibility = 48;
-          explanation =
-            "The gardener chose the sensible option and succeeded. This earns moderate credit because the success was expected.";
-        } else {
-          responsibility = 72;
-          explanation =
-            "The gardener chose unexpectedly and succeeded. This can suggest special insight or skill, so credit is higher.";
-        }
-
-        document.getElementById("pivotEmoji").textContent = "🌼";
-      } else {
-        tone = "blame";
-
-        if (pivotChoiceExpected) {
-          responsibility = 38;
-          explanation =
-            "The gardener chose the sensible option but still failed. Blame is reduced because the decision itself looked reasonable.";
-        } else {
-          responsibility = 72;
-          explanation =
-            "The gardener chose unexpectedly and failed. This looks like poor judgment, so blame is stronger.";
-        }
-
-        document.getElementById("pivotEmoji").textContent = "🥀";
-      }
-
-      if (pivotPivotal) {
-        responsibility += 18;
-        explanation +=
-          " The action was pivotal: choosing differently would have changed the outcome.";
-      } else {
-        responsibility -= 12;
-        explanation +=
-          " The action was not pivotal: the outcome would have happened anyway, reducing responsibility.";
-      }
-
-      responsibility = clamp(Math.round(responsibility), 5, 95);
-
-      const label = tone === "credit" ? "Credit" : "Blame";
-      const choiceText = pivotChoiceExpected ? "Expected decision" : "Unexpected decision";
-      const pivotalText = pivotPivotal ? "pivotal" : "not pivotal";
-
-      document.getElementById("pivotBadge").textContent =
-        choiceText + " · " + pivotalText;
-
-      document.getElementById("pivotLabel").textContent =
-        label + ": " + responsibility + " / 100";
-
-      const bar = document.getElementById("pivotBar");
-      bar.style.width = responsibility + "%";
-      bar.className = "bar-fill " + tone;
-
-      document.getElementById("pivotExplanation").textContent = explanation;
+      var d = EXP3[gChoice + "-" + gOut + "-" + (gPiv ? 1 : 0)];
+      $("pivotEmoji").textContent = gOut ? "🌼" : "🥀";
+      $("pivotBadge").textContent = (gChoice === 30 ? "Unexpected decision" : "Expected decision") + " · " + (gPiv ? "pivotal" : "not pivotal");
+      $("pivotModel").textContent = setResp("pivotBar", "pivotTick", "pivotLabel", d) + " / 100";
+      setBars(true, d.emp);
+      $("gAgentModel").textContent = fmtAgents(d.model);
+      var ex = gOut
+        ? (gChoice === 30 ? "Choosing the 30% fertilizer and succeeding suggests the gardener sensed it would work this time (skill), so credit is higher than for the expected choice." : "Choosing the sensible 70% fertilizer and succeeding reveals little beyond being average, so credit is moderate.")
+        : (gChoice === 30 ? "Choosing the 30% fertilizer and failing looks like a bad gardener misreading the cue, so blame is higher." : "Choosing the sensible option and still failing says little against the gardener, so blame is lower.");
+      ex += gPiv ? " The other fertilizer would have changed the outcome, so the choice made the difference." : " The outcome would have been the same either way, so responsibility drops.";
+      $("pivotExplanation").textContent = ex;
     }
 
-    /* Model calculator */
+    /* Model */
+    var PRIORS = { goalie: [0.26, 0.43, 0.31], spinner: [0.27, 0.46, 0.27], gardener: [0.30, 0.37, 0.33] };
+    var REWARD = [0, 0.63, 1], BETA = 1.5;
+    var prior = PRIORS.goalie.slice(), mOut = 1, mPiv = 1;
+    function sm(x, y) { return Math.exp(BETA * x) / (Math.exp(BETA * x) + Math.exp(BETA * y)); }
+    function setPrior(k) {
+      prior = PRIORS[k].slice(); sel("prior-btn", "prior", k);
+      $("pSkilled").value = prior[2]; $("pUnskilled").value = prior[0]; updateModel();
+    }
+    function customPrior() {
+      var s = Number($("pSkilled").value), u = Number($("pUnskilled").value);
+      if (s + u > 0.98) { if (document.activeElement === $("pSkilled")) { s = 0.98 - u; $("pSkilled").value = s; } else { u = 0.98 - s; $("pUnskilled").value = u; } }
+      prior = [u, 1 - s - u, s]; sel("prior-btn", "prior", "none"); updateModel();
+    }
+    function setMOut(o) { mOut = o; sel("m-out-btn", "mout", o); updateModel(); }
+    function setMPiv(p) { mPiv = p; sel("m-piv-btn", "mpiv", p); updateModel(); }
+    function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+    function pct(x) { return (100 * x).toFixed(0) + "%"; }
     function updateModel() {
-      const expectationRaw = Number(document.getElementById("expectationSlider").value);
-      const pivotalityRaw = Number(document.getElementById("pivotalitySlider").value);
-      const weightExpectation = Number(document.getElementById("weightExpectation").value);
-      const weightPivotality = Number(document.getElementById("weightPivotality").value);
-
-      document.getElementById("expectationValue").textContent =
-        (expectationRaw > 0 ? "+" : "") + expectationRaw;
-
-      document.getElementById("pivotalityValue").textContent =
-        pivotalityRaw + "%";
-
-      document.getElementById("weightExpectationValue").textContent =
-        weightExpectation.toFixed(2);
-
-      document.getElementById("weightPivotalityValue").textContent =
-        weightPivotality.toFixed(2);
-
-      const expectation = expectationRaw / 100;
-      const pivotality = pivotalityRaw / 100;
-
-      const expectationContribution = 45 * weightExpectation * expectation;
-      const pivotalityContribution = 25 * weightPivotality * pivotality;
-
-      let responsibility = 50 + expectationContribution + pivotalityContribution;
-      responsibility = clamp(Math.round(responsibility), 0, 100);
-
-      const tone = responsibility >= 50 ? "credit" : "blame";
-      const label = responsibility >= 50 ? "Credit" : "Blame";
-
-      document.getElementById("modelLabel").textContent =
-        label + ": " + responsibility + " / 100";
-
-      const bar = document.getElementById("modelBar");
-      bar.style.width = Math.max(responsibility, 3) + "%";
-      bar.className = "bar-fill " + tone;
-
-      document.getElementById("modelExplanation").textContent =
-        "Expectation change contributes about " +
-        Math.round(expectationContribution) +
-        " points. Pivotality contributes about " +
-        Math.round(pivotalityContribution) +
-        " points. The baseline is 50.";
+      var p = Number($("mProb").value) / 100;
+      $("mProbVal").textContent = Math.round(p * 100) + "%";
+      $("pSkilledVal").textContent = pct(prior[2]); $("pUnskilledVal").textContent = pct(prior[0]); $("pAverageVal").textContent = pct(prior[1]);
+      var lAvg = sm(p, 1 - p), lSk, lUn;
+      if (mPiv < 1) { lSk = 0.5; lUn = 0.5; }
+      else if (mOut === 1) { lSk = sm(1, 0); lUn = sm(-1, 0); }
+      else { lSk = sm(0, 1); lUn = sm(0, -1); }
+      var v = [prior[0] * lUn, prior[1] * lAvg, prior[2] * lSk], z = v[0] + v[1] + v[2];
+      var post = v.map(function (x) { return x / z; });
+      var ePrior = dot(prior, REWARD), ePost = dot(post, REWARD), diff = ePost - ePrior;
+      var piv = mOut === 1 ? mPiv : -mPiv;
+      var r = 7 + 153.1 * diff + 33.7 * piv;
+      var credit = mOut === 1, mag = clamp(Math.round(credit ? r : -r), 0, 100);
+      $("modelLabel").textContent = (credit ? "Predicted credit: " : "Predicted blame: ") + mag + " / 100";
+      var bar = $("modelBar"); bar.style.width = Math.max(mag, 2) + "%"; bar.className = "bar-fill " + (credit ? "credit" : "blame");
+      $("tPs").textContent = pct(prior[2]); $("tPa").textContent = pct(prior[1]); $("tPu").textContent = pct(prior[0]);
+      $("tQs").textContent = pct(post[2]); $("tQa").textContent = pct(post[1]); $("tQu").textContent = pct(post[0]);
+      $("tEp").textContent = ePrior.toFixed(2); $("tEq").textContent = ePost.toFixed(2);
+      $("modelExplanation").textContent = "Expected future reward moved by " + (diff >= 0 ? "+" : "") + diff.toFixed(2) +
+        (credit ? (diff >= 0 ? " - this person now looks better than a typical agent, earning credit." : " - a success that still makes the person look no better than typical earns little credit.")
+                : (diff <= 0 ? " - this person now looks worse than a typical agent, earning blame." : " - the failure does not lower our expectations much, so blame is limited.")) +
+        (mPiv < 1 ? " With the action non-pivotal, skilled and unskilled agents are equally likely to pick either option, so the inference rests on the average agent alone." : "");
     }
 
-    /* Initialize */
-    updateGoalie();
-    updatePivotality();
-    updateModel();
+    updateGoalie(); updatePivotality(); setPrior("goalie");
   </script>
 </body>
 </html>
